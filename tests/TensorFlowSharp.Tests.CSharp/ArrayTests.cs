@@ -11,13 +11,10 @@ namespace TensorFlowSharp.Tests.CSharp
 	public class ArrayTests
 	{
         [Fact]
-        public void ModelLoad()
+        public void FrozenModelLoad()
         {
             // Works with frozen models
             string modelFile = @"models\frozen_saved_model.pb";
-
-            // Fails with SavedModel
-            //string modelFile = @"models\saved_model.pb";
 
             // Construct an in-memory graph from the serialized form.
             var graph = new TFGraph();
@@ -33,6 +30,31 @@ namespace TensorFlowSharp.Tests.CSharp
                 var runner = session.GetRunner();
                 runner.AddInput(graph["I"][0], tensor).Fetch(graph["O"][0]);
                 var output = runner.Run();
+            }
+        }
+
+        [Fact]
+        public void SavedModelLoad()
+        {
+            var sessionOptions = new TFSessionOptions();
+            var exportDir = "models";
+            var tags = new string[] { "serve" };
+            var graph = new TFGraph();
+            var metaGraphDef = new TFBuffer();
+
+            using (var sess = new TFSession())
+            {
+                var session = sess.FromSavedModel(sessionOptions, null, exportDir, tags, graph, metaGraphDef);
+                TFTensor tensor = new float[,] { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
+
+                var runner = session.GetRunner();
+                runner.AddInput(graph["I"][0], tensor).Fetch(graph["O"][0]);
+                var output = runner.Run();
+
+                var result = output[0];
+                var rshape = result.Shape;
+                var val = (float[,])result.GetValue(jagged: false);
+                Assert.True(val[0, 0] == 31);
             }
         }
 
