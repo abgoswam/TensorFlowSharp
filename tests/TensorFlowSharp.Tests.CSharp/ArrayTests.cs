@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using TensorFlow;
 using Xunit;
@@ -9,7 +10,33 @@ namespace TensorFlowSharp.Tests.CSharp
 {
 	public class ArrayTests
 	{
-		[Fact]
+        [Fact]
+        public void ModelLoad()
+        {
+            // Works with frozen models
+            string modelFile = @"models\frozen_saved_model.pb";
+
+            // Fails with SavedModel
+            //string modelFile = @"models\saved_model.pb";
+
+            // Construct an in-memory graph from the serialized form.
+            var graph = new TFGraph();
+
+            // Load the serialized GraphDef from a file.
+            var model = File.ReadAllBytes(modelFile);
+            graph.Import(model, "");
+
+            using (var session = new TFSession(graph))
+            {
+                TFTensor tensor = new float[,] { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
+
+                var runner = session.GetRunner();
+                runner.AddInput(graph["I"][0], tensor).Fetch(graph["O"][0]);
+                var output = runner.Run();
+            }
+        }
+
+        [Fact]
 		public void BasicConstantZerosAndOnes ()
 		{
 			using (var g = new TFGraph ())
