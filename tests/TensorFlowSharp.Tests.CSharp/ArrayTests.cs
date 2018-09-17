@@ -56,6 +56,30 @@ namespace TensorFlowSharp.Tests.CSharp
             Assert.True(val[0, 0] == 31);
         }
 
+        [Fact(Skip ="Not working as yet")]
+        public void FreezeSavedModel()
+        {
+            var sessionOptions = new TFSessionOptions();
+            var exportDir = @"models";
+            var tags = new string[] { "serve" };
+            var graph = new TFGraph();
+            var metaGraphDef = new TFBuffer();
+
+            var session = TFSession.FromSavedModel(sessionOptions, null, exportDir, tags, graph, metaGraphDef);
+
+            // can we freeze graph ?
+            var items = graph.GetEnumerator();
+            foreach(var op in items)
+            {
+                //if (op.OpType == "Variable")
+                //{
+                //    var op_clone = new TFOperation();
+                //    var attr = op.GetAttributeMetadata("dtype");
+                //    var value = op.GetAttributeMetadata("value");
+                //}
+            }
+        }
+
         [Fact]
         public void SavedModelLoadCifar()
         {
