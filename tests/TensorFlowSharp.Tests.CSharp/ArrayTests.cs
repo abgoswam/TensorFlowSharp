@@ -5,11 +5,12 @@ using System.IO;
 using System.Numerics;
 using TensorFlow;
 using Xunit;
+using ExampleCommon;
 
 namespace TensorFlowSharp.Tests.CSharp
 {
-	public class ArrayTests
-	{
+    public class ArrayTests
+    {
         [Fact]
         public void FrozenModelLoad()
         {
@@ -37,83 +38,107 @@ namespace TensorFlowSharp.Tests.CSharp
         public void SavedModelLoad()
         {
             var sessionOptions = new TFSessionOptions();
-            var exportDir = "models";
+            var exportDir = @"models";
             var tags = new string[] { "serve" };
             var graph = new TFGraph();
             var metaGraphDef = new TFBuffer();
 
-            using (var sess = new TFSession())
-            {
-                var session = sess.FromSavedModel(sessionOptions, null, exportDir, tags, graph, metaGraphDef);
-                TFTensor tensor = new float[,] { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
+            var session = TFSession.FromSavedModel(sessionOptions, null, exportDir, tags, graph, metaGraphDef);
+            TFTensor tensor = new float[,] { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
 
-                var runner = session.GetRunner();
-                runner.AddInput(graph["I"][0], tensor).Fetch(graph["O"][0]);
-                var output = runner.Run();
+            var runner = session.GetRunner();
+            runner.AddInput(graph["I"][0], tensor).Fetch(graph["O"][0]);
+            var output = runner.Run();
 
-                var result = output[0];
-                var rshape = result.Shape;
-                var val = (float[,])result.GetValue(jagged: false);
-                Assert.True(val[0, 0] == 31);
-            }
+            var result = output[0];
+            var rshape = result.Shape;
+            var val = (float[,])result.GetValue(jagged: false);
+            Assert.True(val[0, 0] == 31);
         }
 
         [Fact]
-		public void BasicConstantZerosAndOnes ()
-		{
-			using (var g = new TFGraph ())
-			using (var s = new TFSession (g)) {
+        public void SavedModelLoadCifar()
+        {
+            var sessionOptions = new TFSessionOptions();
+            var exportDir = @"model_cifar10";
+            var tags = new string[] { "serve" };
+            var graph = new TFGraph();
+            var metaGraphDef = new TFBuffer();
 
-				// Test Zeros, Ones for n x n shape
-				var o = g.Ones (new TFShape (4, 4));
-				Assert.NotNull (o);
-				Assert.Equal (o.OutputType, TFDataType.Double);
+            var session = TFSession.FromSavedModel(sessionOptions, null, exportDir, tags, graph, metaGraphDef);
+            var tensor = ImageUtil2.CreateTensorFromImageFile("/tmp/demo_32_32_3.jpg");
 
-				var z = g.Zeros (new TFShape (4, 4));
-				Assert.NotNull (z);
-				Assert.Equal (z.OutputType, TFDataType.Double);
+            var runner = session.GetRunner();
+            runner.AddInput(graph["Input"][0], tensor).Fetch(graph["Output"][0]);
+            var output = runner.Run();
 
-				var r = g.RandomNormal (new TFShape (4, 4));
-				Assert.NotNull (r);
-				Assert.Equal (r.OutputType, TFDataType.Double);
+            var result = output[0];
+            var rshape = result.Shape;
+            var val = (float[,])result.GetValue(jagged: false);
+            Assert.True(val.Length == 10);
+        }
 
-				var res1 = s.GetRunner ().Run (g.Mul (o, r));
-				Assert.NotNull (res1);
-				Assert.Equal (res1.TensorType, TFDataType.Double);
-				Assert.Equal (res1.NumDims, 2);
-				Assert.Equal (res1.Shape [0], 4);
-				Assert.Equal (res1.Shape [1], 4);
-				Assert.Equal (res1.ToString (), "[4x4]");
+        [Fact]
+        public void BasicConstantZerosAndOnes()
+        {
+            using (var g = new TFGraph())
+            using (var s = new TFSession(g))
+            {
 
-				var matval1 = res1.GetValue ();
-				Assert.NotNull (matval1);
-				Assert.IsType (typeof (double [,]), matval1);
-				for (int i = 0; i < 4; i++) {
-					for (int j = 0; j < 4; j++) {
-						Assert.NotNull (((double [,])matval1) [i, j]);
-					}
-				}
+                // Test Zeros, Ones for n x n shape
+                var o = g.Ones(new TFShape(4, 4));
+                Assert.NotNull(o);
+                Assert.Equal(o.OutputType, TFDataType.Double);
 
-				var res2 = s.GetRunner ().Run (g.Mul (g.Mul (o, r), z));
-				Assert.NotNull (res2);
-				Assert.Equal (res2.TensorType, TFDataType.Double);
-				Assert.Equal (res2.NumDims, 2);
-				Assert.Equal (res2.Shape [0], 4);
-				Assert.Equal (res2.Shape [1], 4);
-				Assert.Equal (res2.ToString (), "[4x4]");
+                var z = g.Zeros(new TFShape(4, 4));
+                Assert.NotNull(z);
+                Assert.Equal(z.OutputType, TFDataType.Double);
 
-				var matval2 = res2.GetValue ();
-				Assert.NotNull (matval2);
-				Assert.IsType (typeof (double [,]), matval2);
+                var r = g.RandomNormal(new TFShape(4, 4));
+                Assert.NotNull(r);
+                Assert.Equal(r.OutputType, TFDataType.Double);
 
-				for (int i = 0; i < 4; i++) {
-					for (int j = 0; j < 4; j++) {
-						Assert.NotNull (((double [,])matval2) [i, j]);
-						Assert.Equal (((double [,])matval2) [i, j], 0.0);
-					}
-				}
-			}
-		}
+                var res1 = s.GetRunner().Run(g.Mul(o, r));
+                Assert.NotNull(res1);
+                Assert.Equal(res1.TensorType, TFDataType.Double);
+                Assert.Equal(res1.NumDims, 2);
+                Assert.Equal(res1.Shape[0], 4);
+                Assert.Equal(res1.Shape[1], 4);
+                Assert.Equal(res1.ToString(), "[4x4]");
+
+                var matval1 = res1.GetValue();
+                Assert.NotNull(matval1);
+                Assert.IsType(typeof(double[,]), matval1);
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        Assert.NotNull(((double[,])matval1)[i, j]);
+                    }
+                }
+
+                var res2 = s.GetRunner().Run(g.Mul(g.Mul(o, r), z));
+                Assert.NotNull(res2);
+                Assert.Equal(res2.TensorType, TFDataType.Double);
+                Assert.Equal(res2.NumDims, 2);
+                Assert.Equal(res2.Shape[0], 4);
+                Assert.Equal(res2.Shape[1], 4);
+                Assert.Equal(res2.ToString(), "[4x4]");
+
+                var matval2 = res2.GetValue();
+                Assert.NotNull(matval2);
+                Assert.IsType(typeof(double[,]), matval2);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        Assert.NotNull(((double[,])matval2)[i, j]);
+                        Assert.Equal(((double[,])matval2)[i, j], 0.0);
+                    }
+                }
+            }
+        }
 
 #if false
 		[Fact]
@@ -306,44 +331,47 @@ namespace TensorFlowSharp.Tests.CSharp
         }
 
 
-		private static IEnumerable<object []> transposeData ()
-		{
-			yield return new object [] { new double [,] { { 1, 2 },
-														  { 3, 4 } }};
-			yield return new object [] { new double [,] { { 1, 2, 3 },
-														  { 4, 5, 6} }};
-			yield return new object [] { new double [,] { { 1 },
-														  { 3 } }};
-			yield return new object [] { new double [,] { { 1, 3 } }};
-		}
+        private static IEnumerable<object[]> transposeData()
+        {
+            yield return new object[] { new double [,] { { 1, 2 },
+                                                          { 3, 4 } }};
+            yield return new object[] { new double [,] { { 1, 2, 3 },
+                                                          { 4, 5, 6} }};
+            yield return new object[] { new double [,] { { 1 },
+                                                          { 3 } }};
+            yield return new object[] { new double[,] { { 1, 3 } } };
+        }
 
-		[Theory]
-		[MemberData (nameof (transposeData))]
-		public void nShould_Transpose (double [,] x)
-		{
-			using (var graph = new TFGraph ())
-			using (var session = new TFSession (graph)) {
-				TFOutput a = graph.Placeholder (TFDataType.Double, new TFShape (2));
+        [Theory]
+        [MemberData(nameof(transposeData))]
+        public void nShould_Transpose(double[,] x)
+        {
+            using (var graph = new TFGraph())
+            using (var session = new TFSession(graph))
+            {
+                TFOutput a = graph.Placeholder(TFDataType.Double, new TFShape(2));
 
-				TFOutput r = graph.Transpose (a);
+                TFOutput r = graph.Transpose(a);
 
-				TFTensor [] result = session.Run (new [] { a }, new TFTensor [] { x }, new [] { r });
+                TFTensor[] result = session.Run(new[] { a }, new TFTensor[] { x }, new[] { r });
 
-				double [,] actual = (double [,])result [0].GetValue ();
-				double [,] expected = new double [x.GetLength (1), x.GetLength (0)];
-				for (int i = 0; i < expected.GetLength(0); i++) {
-					for (int j = 0; j < expected.GetLength(1); j++) {
-						expected [i, j] = x [j, i];
-					}
-				}
+                double[,] actual = (double[,])result[0].GetValue();
+                double[,] expected = new double[x.GetLength(1), x.GetLength(0)];
+                for (int i = 0; i < expected.GetLength(0); i++)
+                {
+                    for (int j = 0; j < expected.GetLength(1); j++)
+                    {
+                        expected[i, j] = x[j, i];
+                    }
+                }
 
-				TestUtils.MatrixEqual (expected, actual, precision: 10);
-			}
-		}
+                TestUtils.MatrixEqual(expected, actual, precision: 10);
+            }
+        }
 
 
 
-		public static TFDataType TensorTypeFromType(Type type)
+        public static TFDataType TensorTypeFromType(Type type)
         {
             if (type == typeof(float))
                 return TFDataType.Float;
