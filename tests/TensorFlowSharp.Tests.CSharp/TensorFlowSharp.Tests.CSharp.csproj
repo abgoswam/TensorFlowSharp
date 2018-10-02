@@ -118,6 +118,24 @@
     <None Include="model_cifar10\variables\variables.index">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="lr_model\saved_model.pb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="lr_model\variables\variables.data-00000-of-00001">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="lr_model\variables\variables.index">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="model_two_layer_convnet-e05d7e52-601e-491a-a408-58e71fc796c5\saved_model.pb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="model_two_layer_convnet-e05d7e52-601e-491a-a408-58e71fc796c5\variables\variables.data-00000-of-00001">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="model_two_layer_convnet-e05d7e52-601e-491a-a408-58e71fc796c5\variables\variables.index">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

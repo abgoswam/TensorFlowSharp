@@ -65,7 +65,7 @@ namespace ExampleInceptionInference
 
 
 		static string dir, modelFile, labelsFile;
-		public static void Main (string [] args)
+		public static void Main_1(string [] args)
 		{
 			var files = options.Parse (args);
 			if (dir == null) {
