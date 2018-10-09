@@ -9,9 +9,9 @@ namespace NeuralNetwork
 {
     class Network
     {
-        public static void Main()
+        public static void Main_1()
         {
-            double LearningRate = 0.1;
+            var LearningRate = 0.01;
             double Epochs = 200;
             double DisplaySteps = 10;
             int BatchSize = 128;
@@ -35,9 +35,8 @@ namespace NeuralNetwork
 
             using (var graph = new TFGraph())
             {
-
-                TFOutput X = graph.Placeholder(TFDataType.Float, new TFShape(new long[] { -1, InputSize }));
-                TFOutput Y = graph.Placeholder(TFDataType.Float, new TFShape(new long[] { -1, OutputSize }));
+                TFOutput X = graph.Placeholder(TFDataType.Double, new TFShape(new long[] { -1, InputSize }));
+                TFOutput Y = graph.Placeholder(TFDataType.Double, new TFShape(new long[] { -1, OutputSize }));
 
                 TFOutput[] weights = new TFOutput[NodeSize.Length + 1];
                 TFOutput[] biases = new TFOutput[NodeSize.Length + 1];
@@ -48,8 +47,8 @@ namespace NeuralNetwork
                 int prevSize = InputSize;
                 for(int i = 0; i < NodeSize.Length; i++)
                 {
-                    weights[i] = graph.VariableV2(new TFShape(new long[] { prevSize, NodeSize[i]  }), TFDataType.Float, operName: "weight_" + i);
-                    biases[i] = graph.VariableV2(new TFShape(new long[] { NodeSize[i] }), TFDataType.Float, operName: "bias_" + i);
+                    weights[i] = graph.VariableV2(new TFShape(new long[] { prevSize, NodeSize[i]  }), TFDataType.Double, operName: "weight_" + i);
+                    biases[i] = graph.VariableV2(new TFShape(new long[] { NodeSize[i] }), TFDataType.Double, operName: "bias_" + i);
                     prevSize = NodeSize[i];
 
                     var s1 = graph.GetShape(weights[i]);
@@ -57,8 +56,8 @@ namespace NeuralNetwork
 
                 }
 
-                weights[NodeSize.Length] = graph.VariableV2(new TFShape(new long[] { prevSize, OutputSize }), TFDataType.Float, operName: "weight_out");
-                biases[NodeSize.Length] = graph.VariableV2(new TFShape(new long[] { OutputSize }), TFDataType.Float, operName: "bias_out");
+                weights[NodeSize.Length] = graph.VariableV2(new TFShape(new long[] { prevSize, OutputSize }), TFDataType.Double, operName: "weight_out");
+                biases[NodeSize.Length] = graph.VariableV2(new TFShape(new long[] { OutputSize }), TFDataType.Double, operName: "bias_out");
 
                 TFOutput pred = Predict(X, weights, biases, graph);
                 var pred_shape = graph.GetShape(pred);
@@ -82,7 +81,8 @@ namespace NeuralNetwork
 
                 for(int i = 0; i < parameters.Length; i++)
                 {
-                    optimize[i] = graph.AssignSub(parameters[i], graph.Mul(grad[i], graph.Const(LearningRate))).Operation;
+                    var eps = graph.Mul(grad[i], graph.Const(LearningRate));
+                    optimize[i] = graph.AssignSub(parameters[i], eps).Operation;
                 }
 
                 TFSession sess = new TFSession(graph);
@@ -109,7 +109,6 @@ namespace NeuralNetwork
                         Console.WriteLine("Epoch - " + i + " | Cost - " + result.GetValue());
                 }
             }
-
         }
 
         public static TFOutput Predict(TFOutput x, TFOutput[] w, TFOutput[] b, TFGraph graph)

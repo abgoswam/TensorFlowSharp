@@ -47,7 +47,7 @@ namespace ExampleObjectDetection
 		/// ExampleObjectDetection --input_image="/demo/input.jpg" --output_image="/demo/output.jpg" --catalog="/demo/mscoco_label_map.pbtxt" --model="/demo/frozen_inference_graph.pb"
 		/// </summary>
 		/// <param name="args"></param>
-		static void Main (string [] args)
+		static void Main_1 (string [] args)
 		{
 			options.Parse (args);
 

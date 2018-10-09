@@ -57,8 +57,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LinearFitExample.cs" />
+    <Compile Include="Network_2.cs" />
     <Compile Include="Network.cs" />
+    <Compile Include="Network_3.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -73,6 +74,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="model_linear_fit-d0966df2-a553-402d-a998-6b3753d2c3f9\saved_model.pb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="model_linear_fit-d0966df2-a553-402d-a998-6b3753d2c3f9\variables\variables.data-00000-of-00001">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="model_linear_fit-d0966df2-a553-402d-a998-6b3753d2c3f9\variables\variables.index">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -12,7 +12,7 @@ namespace ExampleTrainPredictGradients
     /// </summary>
     class Program
     {
-        static void Main_2(string[] args)
+        static void Main(string[] args)
         {
             var xList = new List<double>();
             var yList = new List<double>();
@@ -22,7 +22,7 @@ namespace ExampleTrainPredictGradients
                 var num = ran.NextDouble();
                 var noise = ran.NextDouble();
                 xList.Add(num);
-                yList.Add(num * 3 + 4 + noise); // y = 3 * x + 4
+                yList.Add(num * 10 + 10 + noise); // y = 10 * x + 10
             }
             var xData = xList.ToArray();
             var yData = yList.ToArray();

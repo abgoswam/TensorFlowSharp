@@ -53,7 +53,7 @@ namespace SampleTest
 				Placeholder (graph, status);
 				Assert (graph ["feed"] != null);
 
-				ScalarConst (3, graph, status);
+				ScalarConst (4, graph, status);
 				Assert (graph ["scalar"] != null);
 
 				// Export to GraphDef
@@ -77,8 +77,15 @@ namespace SampleTest
 
 				Assert (feed != null);
 
-				// Can add nodes to the imported graph without trouble
-				Add (feed, scalar, graph, status);
+                var s = new TFSession(graph, status);
+                var runner = s.GetRunner();
+                var output = runner
+                    .Fetch("imported/scalar")
+                    .Run();
+                var val = output[0].GetValue();
+
+                // Can add nodes to the imported graph without trouble
+                Add (feed, scalar, graph, status);
 				Assert (status);
 			}
 		}
